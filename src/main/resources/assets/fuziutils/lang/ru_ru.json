@@ -1,0 +1,10 @@
+{
+  "key.fuziutils.freecam": "Переключить фрикам",
+  "key.fuziutils.gamma": "Переключить гамму",
+  "key.categories.fuziutils": "FuziUtils",
+
+  "message.fuziutils.freecam.on": "§b[FuziUtils] §fФрикам §aВКЛЮЧЁН",
+  "message.fuziutils.freecam.off": "§b[FuziUtils] §fФрикам §cВЫКЛЮЧЕН",
+  "message.fuziutils.gamma.on": "§b[FuziUtils] §fГамма §aВКЛЮЧЕНА",
+  "message.fuziutils.gamma.off": "§b[FuziUtils] §fГамма §cВЫКЛЮЧЕНА"
+}

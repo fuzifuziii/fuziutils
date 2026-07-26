@@ -1,0 +1,10 @@
+{
+  "key.fuziutils.freecam": "Toggle Freecam",
+  "key.fuziutils.gamma": "Toggle Gamma Vision",
+  "key.categories.fuziutils": "FuziUtils",
+
+  "message.fuziutils.freecam.on": "§b[FuziUtils] §fFreecam §aENABLED",
+  "message.fuziutils.freecam.off": "§b[FuziUtils] §fFreecam §cDISABLED",
+  "message.fuziutils.gamma.on": "§b[FuziUtils] §fGamma Vision §aENABLED",
+  "message.fuziutils.gamma.off": "§b[FuziUtils] §fGamma Vision §cDISABLED"
+}

@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.fuzi.fuziutils.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "GuiCameraPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
