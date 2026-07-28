@@ -67,8 +67,10 @@ public class FreecamRenderer {
 
         RenderSystem.setShaderColor(R, G, B, ALPHA);
         renderingGhost = true;
+        mc.getEntityRenderDispatcher().setRenderShadow(false);
         mc.getEntityRenderDispatcher().render(player, 0.0, 0.0, 0.0,
                 yRot, partialTick, poseStack, bufferSource, light);
+        mc.getEntityRenderDispatcher().setRenderShadow(true);
         renderingGhost = false;
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 

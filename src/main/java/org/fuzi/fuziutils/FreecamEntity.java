@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class FreecamEntity extends net.minecraft.world.entity.Entity {
 
-    private static final EntityDimensions FREECAM_DIMENSIONS = EntityDimensions.scalable(0.6f, 1.8f).withEyeHeight(1.62f);
+    private static final EntityDimensions FREECAM_DIMENSIONS = EntityDimensions.scalable(0.2f, 0.2f).withEyeHeight(0.1f);
 
     private static final double MAX_STEP = 0.2;
 
@@ -18,7 +18,9 @@ public class FreecamEntity extends net.minecraft.world.entity.Entity {
         super(EntityType.ITEM, level);
         this.noPhysics = false;
         this.noCulling = true;
-        this.setPos(owner.getX(), owner.getY(), owner.getZ());
+
+        double eyeY = owner.getEyeY() - FREECAM_DIMENSIONS.eyeHeight();
+        this.setPos(owner.getX(), eyeY, owner.getZ());
         this.setYRot(owner.getYRot());
         this.setXRot(owner.getXRot());
 

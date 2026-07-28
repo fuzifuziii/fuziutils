@@ -7,11 +7,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -75,9 +77,9 @@ public class FuziUtilsClient {
         NeoForge.EVENT_BUS.addListener(FuziUtilsClient::onKeyInput);
         NeoForge.EVENT_BUS.addListener(FuziUtilsClient::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(FuziUtilsClient::onPlayerTick);
-        NeoForge.EVENT_BUS.addListener(FuziUtilsClient::onInteractionKey);
         NeoForge.EVENT_BUS.addListener(FuziUtilsClient::onRenderNameTag);
         NeoForge.EVENT_BUS.addListener(FuziUtilsClient::onComputeCameraAngles);
+        NeoForge.EVENT_BUS.addListener(FuziUtilsClient::onLoggingOut);
     }
 
     private void onRegisterKeys(RegisterKeyMappingsEvent event) {
@@ -95,12 +97,6 @@ public class FuziUtilsClient {
 
         while (KEY_FREECAM.consumeClick()) toggleFreecam(mc);
         while (KEY_GAMMA.consumeClick())   toggleGamma(mc);
-    }
-
-    static void onInteractionKey(InputEvent.InteractionKeyMappingTriggered event) {
-        if (freecamActive && event.getKeyMapping() == Minecraft.getInstance().options.keyAttack) {
-            event.setCanceled(true);
-        }
     }
 
     static void toggleFreecam(Minecraft mc) {
@@ -122,6 +118,8 @@ public class FuziUtilsClient {
             savedCameraType = mc.options.getCameraType();
             mc.options.setCameraType(CameraType.FIRST_PERSON);
 
+            player.setForcedPose(Pose.STANDING);
+
             player.sendSystemMessage(Component.translatable("message.fuziutils.freecam.on"));
         } else {
             mc.setCameraEntity(player);
@@ -129,11 +127,9 @@ public class FuziUtilsClient {
                 freecamEntity.discard();
                 freecamEntity = null;
             }
-            if (savedPos != null) {
-                player.setPos(savedPos);
-                player.setYRot(savedYaw);
-                player.setXRot(savedPitch);
-            }
+            player.setYRot(savedYaw);
+            player.setXRot(savedPitch);
+            player.setForcedPose(null);
             mc.options.setCameraType(savedCameraType);
             player.sendSystemMessage(Component.translatable("message.fuziutils.freecam.off"));
         }
@@ -162,7 +158,7 @@ public class FuziUtilsClient {
         PacketDistributor.sendToServer(new GammaStatePacket(gammaActive));
     }
 
-    static void onPlayerTick(PlayerTickEvent.Pre event) {
+    static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof LocalPlayer player)) return;
         Minecraft mc = Minecraft.getInstance();
         if (!freecamActive || freecamEntity == null || savedPos == null) return;
@@ -190,8 +186,9 @@ public class FuziUtilsClient {
         player.xBob = player.xBob + (player.getXRot() - player.xBob) * 0.5F;
         player.yBob = player.yBob + (player.getYRot() - player.yBob) * 0.5F;
 
-        player.setDeltaMovement(Vec3.ZERO);
-        player.setPos(savedPos);
+        Vec3 velocity = player.getDeltaMovement();
+        player.setPos(savedPos.x, player.getY(), savedPos.z);
+        player.setDeltaMovement(0.0, velocity.y, 0.0);
 
         Vec3 ghostPos = freecamEntity.getEyePosition();
         PacketDistributor.sendToServer(new FreecamPosPacket(
@@ -236,6 +233,24 @@ public class FuziUtilsClient {
 
         event.setYaw(mc.player.getViewYRot((float) event.getPartialTick()));
         event.setPitch(mc.player.getViewXRot((float) event.getPartialTick()));
+    }
+
+    static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        Minecraft mc = Minecraft.getInstance();
+
+        if (freecamActive) {
+            mc.options.setCameraType(savedCameraType);
+        }
+        freecamActive = false;
+        freecamEntity = null;
+        savedPos = null;
+
+        if (gammaActive) {
+            mc.options.gamma().set(savedGamma);
+        }
+        gammaActive = false;
+        gammaPlayers.clear();
+        ghostPlayers.clear();
     }
 
     private static boolean isVanillaKeyDown(String translationKey) {

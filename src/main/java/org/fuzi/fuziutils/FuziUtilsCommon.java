@@ -4,7 +4,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.fuzi.fuziutils.network.FreecamBroadcastPacket;
@@ -27,13 +26,6 @@ public class FuziUtilsCommon {
     public static void init(IEventBus modEventBus) {
         modEventBus.addListener(FuziUtilsCommon::onRegisterPayloads);
         NeoForge.EVENT_BUS.addListener(FuziUtilsCommon::onPlayerLeave);
-        NeoForge.EVENT_BUS.addListener(FuziUtilsCommon::onLeftClickBlock);
-    }
-
-    private static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (serverFreecamPlayers.contains(event.getEntity().getUUID())) {
-            event.setCanceled(true);
-        }
     }
 
     private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
@@ -71,9 +63,11 @@ public class FuziUtilsCommon {
                     sender.setNoGravity(pkt.enabled());
                     if (pkt.enabled()) {
                         serverFreecamPlayers.add(uuid);
+                        sender.setForcedPose(net.minecraft.world.entity.Pose.STANDING);
                     } else {
                         serverFreecamPlayers.remove(uuid);
                         sender.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                        sender.setForcedPose(null);
                     }
 
                     PacketDistributor.sendToPlayersNear(
@@ -114,5 +108,10 @@ public class FuziUtilsCommon {
             PacketDistributor.sendToAllPlayers(new FreecamBroadcastPacket(uuid, false));
         }
         serverGammaPlayers.remove(uuid);
+
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            serverPlayer.setNoGravity(false);
+            serverPlayer.setForcedPose(null);
+        }
     }
 }

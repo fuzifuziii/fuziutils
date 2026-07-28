@@ -4,7 +4,11 @@
   "package": "org.fuzi.fuziutils.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "GuiCameraPlayerMixin"
+    "GuiCameraPlayerMixin",
+    "PlayerRendererGhostHeadMixin",
+    "GameRendererFreecamPickMixin",
+    "LocalPlayerForcedPoseMixin",
+    "ItemInHandLayerGhostMixin"
   ],
   "injectors": {
     "defaultRequire": 1
